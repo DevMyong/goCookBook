@@ -1,16 +1,22 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"goServer/internal/flags"
+	"goServer/internal/signals"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main(){
-	c := flags.Config{}
-	c.Setup()
+	signaltwo := make(chan os.Signal)
+	done := make(chan bool)
 
-	flag.Parse()
+	signal.Notify(signaltwo, syscall.SIGINT, syscall.SIGTERM)
 
-	fmt.Println(c.GetMessage())
+	go signals.CatchSig(signaltwo, done)
+
+	fmt.Println("Press ctrl-c to terminate...")
+	<-done
+	fmt.Println("Done!")
 }
